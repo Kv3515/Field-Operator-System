@@ -172,7 +172,7 @@ h1,h2,h3,h4 {{ color: {TEXT}; letter-spacing: -0.5px; }}
 def inject():
     st.markdown(CSS, unsafe_allow_html=True)
 
-def hero(title: str, subtitle: str, badge: str | None = None):
+def hero(title: str, subtitle: str, badge=None):
     badge_html = ""
     if badge:
         badge_html = f'<div class="fo-badge"><span class="fo-dot"></span>{badge}</div>'
