@@ -33,19 +33,19 @@ with st.expander("▸  Update Drone Status", expanded=False):
         st.success(f"{drone_code} updated.")
         st.rerun()
 
-# ── Set drone name form ────────────────────────────────────────────────────────
-with st.expander("▸  Set Drone Name", expanded=False):
+# ── Set drone model form ───────────────────────────────────────────────────────
+with st.expander("▸  Set Drone Model", expanded=False):
     drone_names = db.get_drone_names()
     with st.form("drone_name_form", clear_on_submit=True):
-        name_drone = st.selectbox("Drone", drones, key="name_drone_sel")
-        current    = drone_names.get(name_drone, "")
-        new_name   = st.text_input("Drone Name", value=current,
-                                   placeholder='e.g. "Eagle One", "Shadow 2"')
-        name_sub   = st.form_submit_button("Save Name", use_container_width=True, type="primary")
+        name_drone = st.selectbox("Drone Code", drones, key="name_drone_sel")
+        current    = drone_names.get(name_drone, db.DRONE_MODELS[0])
+        curr_idx   = db.DRONE_MODELS.index(current) if current in db.DRONE_MODELS else 0
+        new_name   = st.selectbox("Drone Model", db.DRONE_MODELS, index=curr_idx)
+        name_sub   = st.form_submit_button("Save", use_container_width=True, type="primary")
 
     if name_sub:
         db.set_drone_name(name_drone, new_name)
-        st.success(f"{name_drone} named '{new_name}'.")
+        st.success(f"{name_drone} → {new_name}")
         st.rerun()
 
 # ── Fleet list ─────────────────────────────────────────────────────────────────

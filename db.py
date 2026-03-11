@@ -7,6 +7,23 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "field.db")
 # ── Sortie type labels ────────────────────────────────────────────────────────
 SORTIE_TYPES = {1: "Day Ops", 2: "Night Ops", 3: "Training", 4: "Recce", 5: "Other"}
 
+# ── Drone models ──────────────────────────────────────────────────────────────
+DRONE_MODELS = [
+    "DJI Air 3S",
+    "RPAV",
+    "DJI Mavic 2 Enterprise",
+    "SVL Copter Q5 HA",
+    "DJI 4T",
+    "DJI Air 2S DJI Mavic 2 Advance",
+    "DJI Air 2S",
+    "DJI 350 RTK",
+    "DJI Awata-2",
+    "DJI NEO",
+    "DJI Phantom 4",
+    "DJI Mavic Mini",
+    "Nano Drone - Black Hornet",
+]
+
 # ── Serviceability labels ─────────────────────────────────────────────────────
 SERVICEABILITY = {
     1: "Serviceable",
