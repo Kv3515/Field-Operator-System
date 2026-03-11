@@ -24,6 +24,20 @@ DRONE_MODELS = [
     "Nano Drone - Black Hornet",
 ]
 
+# ── Drone locations ───────────────────────────────────────────────────────────
+DRONE_LOCATIONS = [
+    "10 Coy",
+    "20 Coy",
+    "30 Coy",
+    "40 Coy",
+    "50 Coy",
+    "60 Coy",
+    "A8",
+    "CO QRT",
+    "M2",
+    "Bn HQ",
+]
+
 # ── Serviceability labels ─────────────────────────────────────────────────────
 SERVICEABILITY = {
     1: "Serviceable",
@@ -73,10 +87,12 @@ def init_database():
                 created_at TEXT DEFAULT (datetime('now'))
             )
         """)
-        # Migrate: add drone_name column if it doesn't exist yet
+        # Migrate: add columns if they don't exist yet
         cols = [r[1] for r in cur.execute("PRAGMA table_info(drones)").fetchall()]
         if "drone_name" not in cols:
             cur.execute("ALTER TABLE drones ADD COLUMN drone_name TEXT DEFAULT ''")
+        if "drone_location" not in cols:
+            cur.execute("ALTER TABLE drones ADD COLUMN drone_location TEXT DEFAULT ''")
 
         # Flight logs
         cur.execute("""
@@ -163,6 +179,20 @@ def set_drone_name(drone_code, drone_name):
     with _conn() as con:
         con.execute("UPDATE drones SET drone_name = ? WHERE drone_code = ?",
                     (drone_name.strip(), drone_code))
+        con.commit()
+
+
+def get_drone_locations():
+    """Returns {drone_code: drone_location} for all drones."""
+    with _conn() as con:
+        rows = con.execute("SELECT drone_code, drone_location FROM drones ORDER BY drone_code").fetchall()
+    return {r[0]: r[1] for r in rows}
+
+
+def set_drone_location(drone_code, location):
+    with _conn() as con:
+        con.execute("UPDATE drones SET drone_location = ? WHERE drone_code = ?",
+                    (location.strip(), drone_code))
         con.commit()
 
 

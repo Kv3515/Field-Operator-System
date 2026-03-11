@@ -47,22 +47,27 @@ style.section("Fleet Breakdown")
 all_drones   = db.get_drones()
 statuses_map = {s["drone_code"]: s for s in db.get_latest_drone_status()}
 last_op_map  = db.get_last_operator_per_drone()
+drone_locs   = db.get_drone_locations()
 
 ICONS  = {"Serviceable": "🟢", "Minor Fault": "🟡", "Grounded": "🔴", "Under Repair": "🔧"}
 COLORS = {"Serviceable": "green", "Minor Fault": "amber", "Grounded": "red", "Under Repair": "blue"}
 
+th = ("padding:8px 12px;text-align:left;font-size:0.65rem;letter-spacing:2px;"
+      "text-transform:uppercase;color:#888;font-weight:700")
 rows_html = ""
 for drone in all_drones:
-    s       = statuses_map.get(drone)
-    op      = last_op_map.get(drone, "—")
-    label   = db.SERVICEABILITY.get(s["serviceability"], "Unknown") if s else "No Status"
-    icon    = ICONS.get(label, "⚪")
-    color   = COLORS.get(label, "gray")
-    chip    = style.chip(f"{icon} {label}", color)
+    s        = statuses_map.get(drone)
+    op       = last_op_map.get(drone, "—")
+    location = drone_locs.get(drone, "—") or "—"
+    label    = db.SERVICEABILITY.get(s["serviceability"], "Unknown") if s else "No Status"
+    icon     = ICONS.get(label, "⚪")
+    color    = COLORS.get(label, "gray")
+    chip     = style.chip(f"{icon} {label}", color)
     rows_html += (
-        f'<tr>'
+        f'<tr style="border-bottom:1px solid #F5EBE8">'
         f'  <td style="padding:10px 12px;font-weight:800;font-size:0.9rem">{drone}</td>'
         f'  <td style="padding:10px 12px;font-size:0.85rem;color:#555">{op}</td>'
+        f'  <td style="padding:10px 12px;font-size:0.85rem;color:#555">{location}</td>'
         f'  <td style="padding:10px 12px">{chip}</td>'
         f'</tr>'
     )
@@ -73,17 +78,13 @@ st.markdown(
     f'  <table style="width:100%;border-collapse:collapse">'
     f'    <thead>'
     f'      <tr style="background:#F5EBE8;border-bottom:1.5px solid #EDD8D8">'
-    f'        <th style="padding:8px 12px;text-align:left;font-size:0.65rem;letter-spacing:2px;'
-    f'                   text-transform:uppercase;color:#888;font-weight:700">Drone</th>'
-    f'        <th style="padding:8px 12px;text-align:left;font-size:0.65rem;letter-spacing:2px;'
-    f'                   text-transform:uppercase;color:#888;font-weight:700">Last Operator</th>'
-    f'        <th style="padding:8px 12px;text-align:left;font-size:0.65rem;letter-spacing:2px;'
-    f'                   text-transform:uppercase;color:#888;font-weight:700">Serviceability</th>'
+    f'        <th style="{th}">Drone</th>'
+    f'        <th style="{th}">Last Op</th>'
+    f'        <th style="{th}">Location</th>'
+    f'        <th style="{th}">Status</th>'
     f'      </tr>'
     f'    </thead>'
-    f'    <tbody>'
-    f'      {rows_html}'
-    f'    </tbody>'
+    f'    <tbody>{rows_html}</tbody>'
     f'  </table>'
     f'</div>',
     unsafe_allow_html=True,

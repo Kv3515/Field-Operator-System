@@ -48,26 +48,47 @@ with st.expander("▸  Set Drone Model", expanded=False):
         st.success(f"{name_drone} → {new_name}")
         st.rerun()
 
+# ── Set drone location form ────────────────────────────────────────────────────
+with st.expander("▸  Set Drone Location", expanded=False):
+    drone_locs = db.get_drone_locations()
+    with st.form("drone_location_form", clear_on_submit=True):
+        loc_drone  = st.selectbox("Drone Code", drones, key="loc_drone_sel")
+        current_l  = drone_locs.get(loc_drone, db.DRONE_LOCATIONS[0])
+        curr_l_idx = db.DRONE_LOCATIONS.index(current_l) if current_l in db.DRONE_LOCATIONS else 0
+        new_loc    = st.selectbox("Location", db.DRONE_LOCATIONS, index=curr_l_idx)
+        loc_sub    = st.form_submit_button("Save", use_container_width=True, type="primary")
+
+    if loc_sub:
+        db.set_drone_location(loc_drone, new_loc)
+        st.success(f"{loc_drone} → {new_loc}")
+        st.rerun()
+
 # ── Fleet list ─────────────────────────────────────────────────────────────────
 style.section("Fleet Status")
 statuses    = {s["drone_code"]: s for s in db.get_latest_drone_status()}
 drone_names = db.get_drone_names()
+drone_locs  = db.get_drone_locations()
 
 for drone in drones:
-    name  = drone_names.get(drone, "")
-    title = f"{drone}  <span style='font-weight:500;color:#888;font-size:0.85rem'>— {name}</span>" if name else drone
-    s     = statuses.get(drone)
+    name     = drone_names.get(drone, "")
+    location = drone_locs.get(drone, "")
+    title    = f"{drone}  <span style='font-weight:500;color:#888;font-size:0.85rem'>— {name}</span>" if name else drone
+    loc_html = (f'<span style="font-size:0.68rem;font-weight:700;letter-spacing:1.5px;'
+                f'text-transform:uppercase;color:#8B2635">{location}</span>') if location else ""
+    s        = statuses.get(drone)
 
     if s:
-        label     = db.SERVICEABILITY.get(s["serviceability"], "?")
+        label       = db.SERVICEABILITY.get(s["serviceability"], "?")
         color, icon = SVC_CHIP.get(label, ("gray", "⚪"))
-        chip_html = style.chip(label, color)
-        batt      = f"{s['battery_sets_ok']}/{s['battery_sets_total']}" if s["battery_sets_total"] else "—"
+        chip_html   = style.chip(label, color)
+        batt        = f"{s['battery_sets_ok']}/{s['battery_sets_total']}" if s["battery_sets_total"] else "—"
         style.card(
-            f'<div style="display:flex;justify-content:space-between;align-items:center">'
+            f'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
             f'  <div>'
             f'    <div style="font-size:1rem;font-weight:800">{icon} {title}</div>'
-            f'    <div style="margin-top:5px">{chip_html}</div>'
+            f'    <div style="margin-top:4px">{chip_html}'
+            f'      {"&nbsp;&nbsp;" + loc_html if loc_html else ""}'
+            f'    </div>'
             f'  </div>'
             f'  <div style="text-align:right">'
             f'    <div class="fo-card-label">Batteries</div>'
@@ -80,6 +101,9 @@ for drone in drones:
         )
     else:
         style.card(
+            f'<div style="font-weight:700;color:#bbb">⚪ {title}</div>'
+            f'<div style="margin-top:4px">{loc_html}</div>'
+            if loc_html else
             f'<div style="font-weight:700;color:#bbb">⚪ {title}</div>'
             f'<div style="font-size:0.72rem;color:#ccc;margin-top:3px">No status recorded</div>',
         )
